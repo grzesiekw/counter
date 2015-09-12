@@ -19,15 +19,16 @@ trait CounterService {
 
 trait ActorCounterService extends CounterService {
 
-  val operationReceiver: ActorRef
   implicit val executionContext: ExecutionContext
   implicit val operationTimeout: Timeout
+
+  val operationReceiver: ActorRef
 
   override def start(name: String, limit: Int) = (operationReceiver ? StartCounter(name, limit)).mapTo[Response]
   override def stop(name: String) = (operationReceiver ? StopCounter(name)).mapTo[Response]
 }
 
-trait CounterRoute { this: CounterService =>
+trait CounterApi { this: CounterService =>
 
   implicit val executionContext: ExecutionContext
 

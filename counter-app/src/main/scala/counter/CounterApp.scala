@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import counter.http.{ActorCounterService, CounterRoute}
+import counter.http.{ActorCounterService, CounterApi}
 import counter.manager.CounterManager
 import counter.operation.OperationReceiver
 import counter.warning.WarningCollector
@@ -12,7 +12,7 @@ import counter.warning.WarningCollector
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-object CounterApp extends App with CounterRoute with ActorCounterService {
+object CounterApp extends App with CounterApi with ActorCounterService {
   implicit val system = ActorSystem("counter")
   implicit val materializer = ActorMaterializer()
 

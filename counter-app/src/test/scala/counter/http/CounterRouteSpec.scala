@@ -1,26 +1,36 @@
 package counter.http
 
-import akka.http.scaladsl.model.StatusCodes.OK
-import akka.http.scaladsl.testkit.ScalatestRouteTest
-import counter.operation.OperationReceiver.Success
-import org.scalatest.{Matchers, WordSpec}
+import akka.http.scaladsl.model.StatusCodes._
+import counter.operation.OperationReceiver.{Failure, Success}
 
 import scala.concurrent.Future
 
-class CounterRouteSpec extends WordSpec with ScalatestRouteTest with Matchers with CounterRoute with SuccessCounterService {
+class CounterRouteSpec extends BaseSpec {
 
-  implicit val executionContext = system.dispatcher
+  val counterApi = new CounterApi with SuccessCounterService {
+    implicit val executionContext = system.dispatcher
+  }
 
-  "Counter" should {
+  val counterApiFailure = new CounterApi with FailureCounterService {
+    implicit val executionContext = system.dispatcher
+  }
+
+  "CounterApi" should {
     "response OK when Counter was started" in {
-      Post("/counter/test1/limit/10") ~> route ~> check {
+      Post("/counter/test1/limit/10") ~> counterApi.route ~> check {
         status shouldBe OK
       }
     }
 
     "response OK when Counter was stopped" in {
-      Delete("/counter/test1") ~> route ~> check {
+      Delete("/counter/test1") ~> counterApi.route ~> check {
         status shouldBe OK
+      }
+    }
+
+    "response NotFound when Counter does not exist" in {
+      Delete("/counter/test1") ~> counterApiFailure.route ~> check {
+        status shouldBe NotFound
       }
     }
   }
@@ -29,4 +39,9 @@ class CounterRouteSpec extends WordSpec with ScalatestRouteTest with Matchers wi
 trait SuccessCounterService extends CounterService {
   override def start(name: String, limit: Int) = Future.successful(Success())
   override def stop(name: String) = Future.successful(Success())
+}
+
+trait FailureCounterService extends CounterService {
+  override def start(name: String, limit: Int) = Future.successful(Success())
+  override def stop(name: String) = Future.successful(Failure())
 }
