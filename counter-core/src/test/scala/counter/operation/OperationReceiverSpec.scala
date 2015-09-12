@@ -16,20 +16,20 @@ class OperationReceiverSpec extends BaseSpec {
   "OperationReceiver" should {
     "create Counter" in {
       operationReceiver ! StartCounter("A", 100)
-      expectMsg(Success)
+      expectMsg(Success())
     }
 
     "stop Counter" in {
       operationReceiver ! StartCounter("B", 100)
-      expectMsg(Success)
+      expectMsg(Success())
 
       operationReceiver ! StopCounter("B")
-      expectMsg(Success)
+      expectMsg(Success())
     }
 
     "do not stop unknown Counter" in {
       operationReceiver ! StopCounter("C")
-      expectMsg(Failure)
+      expectMsg(Failure())
     }
   }
 }

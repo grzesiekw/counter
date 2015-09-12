@@ -1,6 +1,6 @@
 package counter.operation
 
-import akka.actor.{ActorRef, Props, Actor}
+import akka.actor.{Actor, ActorRef, Props}
 
 class OperationReceiver(counterManager: ActorRef) extends Actor {
   import StartOperation.StartCounter
@@ -16,8 +16,9 @@ class OperationReceiver(counterManager: ActorRef) extends Actor {
 }
 
 object OperationReceiver {
-  case object Success
-  case object Failure
+  abstract class Response
+  case class Success() extends Response
+  case class Failure() extends Response
 
   def props(counterManager: ActorRef) = Props(new OperationReceiver(counterManager))
 }

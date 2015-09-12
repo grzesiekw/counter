@@ -11,6 +11,7 @@ object Version {
 object Library {
   val akka =  "com.typesafe.akka" %% "akka-actor" % Version.akka
   val akkaHttp = "com.typesafe.akka" %% "akka-http-experimental" % Version.akkaHttp
+  val akkaHttpJson = "com.typesafe.akka" %% "akka-http-spray-json-experimental" % Version.akkaHttp
   val akkaPersistence =  "com.typesafe.akka" %% "akka-persistence" % Version.akkaPersistence
 
   val akkaTestKit = "com.typesafe.akka" %% "akka-testkit" % Version.akka % "test"
@@ -22,5 +23,6 @@ object Library {
 object Dependencies {
   import Library._
 
-  val core = Seq(akka, akkaHttp, akkaPersistence, akkaTestKit, scalaTest)
+  val app = Seq(akkaHttp, akkaHttpJson, akkaHttpTestKit, scalaTest)
+  val core = Seq(akka, akkaPersistence, akkaTestKit, scalaTest)
 }

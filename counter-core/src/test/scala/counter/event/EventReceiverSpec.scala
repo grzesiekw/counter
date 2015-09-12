@@ -21,7 +21,7 @@ class EventReceiverSpec extends BaseSpec {
   "EventReceiver" should {
     "increase Counter below limit" in {
       operationReceiver ! StartCounter("A", 10)
-      expectMsg(Success)
+      expectMsg(Success())
 
       eventReceiver ! Event("A", 9)
       warningCollector.expectNoMsg(100 millis)
@@ -29,7 +29,7 @@ class EventReceiverSpec extends BaseSpec {
 
     "increase Counter above limit" in {
       operationReceiver ! StartCounter("B", 10)
-      expectMsg(Success)
+      expectMsg(Success())
 
       eventReceiver ! Event("B", 5)
       eventReceiver ! Event("B", 6)
