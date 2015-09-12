@@ -15,13 +15,15 @@ class CounterRouteSpec extends BaseSpec {
     implicit val executionContext = system.dispatcher
   }
 
-  "CounterApi" should {
+  "Starting Counter via CounterApi" should {
     "response OK when Counter was started" in {
       Post("/counter/test1/limit/10") ~> counterApi.route ~> check {
         status shouldBe OK
       }
     }
+  }
 
+  "Stopping Counter via CounterApi" should {
     "response OK when Counter was stopped" in {
       Delete("/counter/test1") ~> counterApi.route ~> check {
         status shouldBe OK
