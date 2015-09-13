@@ -1,5 +1,6 @@
 import Commons._
 import Dependencies._
+import Resolvers._
 
 name := "counter"
 
