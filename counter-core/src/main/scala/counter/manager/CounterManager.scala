@@ -1,9 +1,9 @@
 package counter.manager
 
-import akka.actor.{ActorRef, Actor, Props}
-import counter.manager.Counter.{Count, Init}
+import akka.actor.{Actor, ActorRef, Props}
+import counter.manager.Counter.{Count, Init, State}
 import counter.operation.StopOperation.Stopped
-import counter.warning.WarningCollector
+import counter.warning.WarningCollector.CounterUnknown
 
 class CounterManager(warningCollector: ActorRef) extends Actor {
   import CounterManager._
@@ -22,12 +22,19 @@ class CounterManager(warningCollector: ActorRef) extends Actor {
         case None =>
           sender() ! NotFound
       }
+    case Details(name) =>
+      context.child(name) match {
+        case Some(ref) =>
+          ref forward State
+        case None =>
+          sender() ! NotFound
+      }
     case Increase(name, value) =>
       context.child(name) match {
         case Some(ref) =>
-          ref ! Count(value)
+          ref forward Count(value)
         case None =>
-          sender() ! NotFound
+          warningCollector ! CounterUnknown(name)
       }
   }
 }
@@ -35,6 +42,8 @@ class CounterManager(warningCollector: ActorRef) extends Actor {
 object CounterManager {
   case class Start(name: String, limit: Long)
   case class Stop(name: String)
+
+  case class Details(name: String)
 
   case class Increase(name: String, value: Long)
 

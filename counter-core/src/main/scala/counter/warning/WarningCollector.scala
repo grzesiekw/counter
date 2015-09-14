@@ -12,6 +12,7 @@ class WarningCollector extends Actor {
 
 object WarningCollector {
   case class CounterExceeded(name: String, limit: Long, actualValue: Long)
+  case class CounterUnknown(name: String)
 
   def props() = Props(classOf[WarningCollector])
 }

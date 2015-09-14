@@ -30,7 +30,6 @@ class StartOperation(counterManager: ActorRef) extends Actor {
 
 object StartOperation {
   case class StartCounter(name: String, limit: Long)
-
   case object Started
 
   def props(counterManager: ActorRef) = Props(new StartOperation(counterManager))

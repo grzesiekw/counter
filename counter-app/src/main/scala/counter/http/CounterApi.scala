@@ -1,20 +1,27 @@
 package counter.http
 
 import akka.actor.ActorRef
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.util.Timeout
-import counter.operation.OperationReceiver.{Response, Failure, Success}
+import counter.manager.Counter.CounterDetails
+import counter.operation.DetailsOperation.GetCounter
+import counter.operation.OperationReceiver.{CounterNotFound, Success}
 import counter.operation.StartOperation.StartCounter
 import counter.operation.StopOperation.StopCounter
+import spray.json.DefaultJsonProtocol
 
-import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.{ExecutionContext, Future}
 
 trait CounterService {
-  def start(name: String, limit: Int): Future[Response]
-  def stop(name: String): Future[Response]
+  type Result[T] = Either[CounterNotFound, T]
+
+  def start(name: String, limit: Long): Future[Success]
+  def stop(name: String): Future[Result[Success]]
+  def details(name: String): Future[Result[CounterDetails]]
 }
 
 trait ActorCounterService extends CounterService {
@@ -24,27 +31,40 @@ trait ActorCounterService extends CounterService {
 
   val operationReceiver: ActorRef
 
-  override def start(name: String, limit: Int) = (operationReceiver ? StartCounter(name, limit)).mapTo[Response]
-  override def stop(name: String) = (operationReceiver ? StopCounter(name)).mapTo[Response]
+  override def start(name: String, limit: Long) = (operationReceiver ? StartCounter(name, limit)).mapTo[Success]
+  override def stop(name: String) = (operationReceiver ? StopCounter(name)).mapTo[Result[Success]]
+  override def details(name: String) = (operationReceiver ? GetCounter(name)).mapTo[Result[CounterDetails]]
 }
 
-trait CounterApi { this: CounterService =>
+trait CounterProtocol extends DefaultJsonProtocol {
+  implicit val counterDetailsFormat = jsonFormat2(CounterDetails)
+}
+
+trait CounterApi extends CounterProtocol with SprayJsonSupport { this: CounterService =>
 
   implicit val executionContext: ExecutionContext
 
-  val route = pathPrefix("counter") {
-    (path(Segment / "limit" / IntNumber) & post) { (name, limit) =>
+  val route = pathPrefix("counter" / Segment) { name =>
+    get {
+      complete {
+        details(name).map[ToResponseMarshallable] {
+          case Right(details) => details
+          case Left(CounterNotFound()) => StatusCodes.NotFound
+        }
+      }
+    } ~
+    (path("limit" / LongNumber) & post) { limit =>
       complete {
         start(name, limit).map[ToResponseMarshallable] {
           case Success() => StatusCodes.OK
         }
       }
     } ~
-    (path (Segment) & delete) { name =>
+    delete {
       complete {
         stop(name).map[ToResponseMarshallable] {
-          case Success() => StatusCodes.OK
-          case Failure() => StatusCodes.NotFound
+          case Right(Success()) => StatusCodes.OK
+          case Left(CounterNotFound()) => StatusCodes.NotFound
         }
       }
     }
