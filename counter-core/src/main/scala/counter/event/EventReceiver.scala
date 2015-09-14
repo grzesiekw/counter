@@ -1,6 +1,6 @@
 package counter.event
 
-import akka.actor.{Props, ActorRef, Actor}
+import akka.actor.{Actor, ActorRef, Props}
 import counter.manager.CounterManager.Increase
 
 class EventReceiver(counterManager: ActorRef) extends Actor {

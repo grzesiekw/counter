@@ -1,8 +1,8 @@
 package counter.operation
 
 import akka.actor.{Actor, ActorRef, Props}
-import counter.manager.CounterManager.Stop
-import counter.operation.OperationReceiver.{Failure, Success}
+import counter.manager.CounterManager.{NotFound, Stop}
+import counter.operation.OperationReceiver.{CounterNotFound, Success}
 import counter.operation.StopOperation.{StopCounter, Stopped}
 
 class StopOperation(counterManager: ActorRef) extends Actor {
@@ -17,11 +17,9 @@ class StopOperation(counterManager: ActorRef) extends Actor {
 
   def replyTo(origin: ActorRef): Receive = {
     case Stopped =>
-      origin ! Success
-      context.stop(self)
-    case _ =>
-      origin ! Failure
-      context.stop(self)
+      origin ! Success()
+    case NotFound =>
+      origin ! CounterNotFound()
   }
 
   def stopItself: Receive = {

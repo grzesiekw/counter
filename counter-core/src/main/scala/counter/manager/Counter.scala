@@ -1,7 +1,7 @@
 package counter.manager
 
-import akka.actor.{ActorRef, Actor, Props}
-import counter.manager.Counter.{Count, Init}
+import akka.actor.{Actor, ActorRef, Props}
+import counter.manager.Counter._
 import counter.operation.StartOperation.Started
 import counter.warning.WarningCollector.CounterExceeded
 
@@ -24,6 +24,8 @@ class Counter(name: String, warningCollector: ActorRef) extends Actor {
       context become {
         active(newLimit)
       }
+    case State =>
+      sender() ! CounterDetails(limit, actualValue)
     case Count(value) =>
       context become {
         val newValue = actualValue + value
@@ -42,6 +44,9 @@ class Counter(name: String, warningCollector: ActorRef) extends Actor {
 object Counter {
   case class Init(limit: Long)
   case class Count(value: Long)
+  case object State
+
+  case class CounterDetails(limit: Long, used: Long)
 
   def props(name: String, warningCollector: ActorRef) = Props(new Counter(name, warningCollector))
 }

@@ -1,10 +1,9 @@
 package counter.operation
 
-import akka.actor.{Props, Actor, ActorRef}
-import counter.manager.CounterManager.{Stop, Start}
-import counter.operation.OperationReceiver.{Failure, Success}
+import akka.actor.{Actor, ActorRef, Props}
+import counter.manager.CounterManager.Start
+import counter.operation.OperationReceiver.Success
 import counter.operation.StartOperation.{StartCounter, Started}
-import counter.operation.StopOperation.{StopCounter, Stopped}
 
 class StartOperation(counterManager: ActorRef) extends Actor {
 
@@ -19,9 +18,7 @@ class StartOperation(counterManager: ActorRef) extends Actor {
 
   def replyTo(origin: ActorRef): Receive = {
     case Started =>
-      origin ! Success
-    case _ =>
-      origin ! Failure
+      origin ! Success()
   }
 
   def stopItself: Receive = {
@@ -33,7 +30,6 @@ class StartOperation(counterManager: ActorRef) extends Actor {
 
 object StartOperation {
   case class StartCounter(name: String, limit: Long)
-
   case object Started
 
   def props(counterManager: ActorRef) = Props(new StartOperation(counterManager))

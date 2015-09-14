@@ -8,5 +8,7 @@ lazy val counterRoot = (project in file(".")).settings(commonSettings).aggregate
 
 lazy val counterCore = (project in file("counter-core")).settings(commonSettings).settings(libraryDependencies ++= core)
 
-lazy val counterApp = (project in file("counter-app")).settings(commonSettings)
+lazy val counterApp = (project in file("counter-app")).settings(commonSettings).settings(libraryDependencies ++= app).
+  dependsOn(counterCore)
+
 triggeredMessage := Watched.clearWhenTriggered

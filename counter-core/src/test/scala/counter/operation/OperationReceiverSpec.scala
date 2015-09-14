@@ -2,8 +2,10 @@ package counter.operation
 
 import akka.testkit.TestProbe
 import counter.BaseSpec
+import counter.manager.Counter.CounterDetails
 import counter.manager.CounterManager
-import counter.operation.OperationReceiver.{Failure, Success}
+import counter.operation.DetailsOperation.GetCounter
+import counter.operation.OperationReceiver.{CounterNotFound, Success}
 import counter.operation.StartOperation.StartCounter
 import counter.operation.StopOperation.StopCounter
 
@@ -16,22 +18,34 @@ class OperationReceiverSpec extends BaseSpec {
   "OperationReceiver" should {
     "create Counter" in {
       operationReceiver ! StartCounter("A", 100)
-      expectMsg(Success)
+      expectMsg(Success())
     }
 
     "stop Counter" in {
       operationReceiver ! StartCounter("B", 100)
-      expectMsg(Success)
+      expectMsg(Success())
 
       operationReceiver ! StopCounter("B")
-      expectMsg(Success)
+      expectMsg(Success())
     }
 
     "do not stop unknown Counter" in {
       operationReceiver ! StopCounter("C")
-      expectMsg(Failure)
+      expectMsg(CounterNotFound())
+    }
+
+    "get Counter details" in {
+      operationReceiver ! StartCounter("D", 100)
+      expectMsg(Success())
+
+      operationReceiver ! GetCounter("D")
+      expectMsg(CounterDetails(100, 0))
+    }
+
+    "do not get unknown Counter details" in {
+      operationReceiver ! GetCounter("E")
+
+      expectMsg(CounterNotFound())
     }
   }
 }
-
-
