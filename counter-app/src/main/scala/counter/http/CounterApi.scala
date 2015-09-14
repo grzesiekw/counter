@@ -25,15 +25,22 @@ trait CounterService {
 }
 
 trait ActorCounterService extends CounterService {
-
   implicit val executionContext: ExecutionContext
   implicit val operationTimeout: Timeout
 
   val operationReceiver: ActorRef
 
   override def start(name: String, limit: Long) = (operationReceiver ? StartCounter(name, limit)).mapTo[Success]
-  override def stop(name: String) = (operationReceiver ? StopCounter(name)).mapTo[Result[Success]]
-  override def details(name: String) = (operationReceiver ? GetCounter(name)).mapTo[Result[CounterDetails]]
+
+  override def stop(name: String) = (operationReceiver ? StopCounter(name)).map {
+    case s: Success => Right(s)
+    case cnf: CounterNotFound => Left(cnf)
+  }
+
+  override def details(name: String) = (operationReceiver ? GetCounter(name)).map {
+    case cd: CounterDetails => Right(cd)
+    case cnf: CounterNotFound => Left(cnf)
+  }
 }
 
 trait CounterProtocol extends DefaultJsonProtocol {
