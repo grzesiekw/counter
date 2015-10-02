@@ -1,6 +1,5 @@
 import sbt._
 import Keys._
-//import scoverage.ScoverageKeys._
 
 object Commons {
   val commonSettings = Seq(
@@ -11,8 +10,8 @@ object Commons {
     scalacOptions := Seq(
       "-feature",
       "-language:postfixOps"
-    )/*,
+    ),
 
-    coverageEnabled := true*/
+    fork in Test := true
   )
 }
