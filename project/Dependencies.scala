@@ -1,9 +1,9 @@
 import sbt._
 
 object Version {
-  val akka = "2.4.0-RC2"
+  val akka = "2.4.0"
   val akkaHttp = "1.0"
-  val akkaPersistence = "2.4.0-RC2"
+  val akkaPersistence = "2.4.0"
   val levelDB = "0.7"
   val levelDBjni = "1.8"
 
